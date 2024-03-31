@@ -68,15 +68,15 @@ void awakenStepper() {
 
 // Send one pulse to the stepper motor which moves the motor by a tiny bit
 void stepperStep(microsecondDelay) {
-	digitalWrite(STEP_PIN, HIGH);
-	delayMicroseconds(microsecondDelay);
-	digitalWrite(STEP_PIN, LOW);
-	delayMicroseconds(microsecondDelay);
+  digitalWrite(STEP_PIN, HIGH);
+  delayMicroseconds(microsecondDelay);
+  digitalWrite(STEP_PIN, LOW);
+  delayMicroseconds(microsecondDelay);
 }
 
 // Move piston down
 void spinMotorCW() {
-	digitalWrite(DIR_PIN, HIGH);
+  digitalWrite(DIR_PIN, HIGH);
 }
 
 // Move piston up
