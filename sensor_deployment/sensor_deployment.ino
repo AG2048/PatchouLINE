@@ -61,7 +61,7 @@ void sleepStepper() {
 void awakenStepper() {
   // Logic high enables normal operation
   digitalWrite(SLEEP_PIN, HIGH);
-  // in order to allow the charge pump to stabilize, provide a delay of 1 ms before issuing a Step comman
+  // In order to allow the charge pump to stabilize, provide a delay of 1 ms before issuing a Step comman
   // SLP pin should be high by default
   delay(1);
 }
@@ -93,9 +93,9 @@ void loop() {
 
     case RETRACTED:
       // Movement subsystem polling
-      // READY_TO_READ = digitalRead(...);
+      // TODO READY_TO_READ = digitalRead(...);
       if (READY_TO_READ) {
-        // Send a signal to the comms team that the deployment system is ready
+        // TODO Send a signal to the comms team that the deployment system is ready
         currentState = EXTENDING;
       }
       break;
@@ -117,13 +117,13 @@ void loop() {
       break;
 
     case MEASURING:
-      // Turns the listener on
+      // Turns the "listener" on
       int sum = 0;
       for (int i = 0; i < MAX_MOISTURE_DATA_PTS; i++) {
         sum += analogRead(MOISTURE);
       }
       sum /= MAX_MOISTURE_DATA_PTS;
-      // Send data to the comms team
+      // TODO Send data to the comms team
       currentState = RETRACTING;
       break;
 
