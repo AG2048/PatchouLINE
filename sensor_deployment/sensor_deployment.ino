@@ -23,12 +23,14 @@ sensorState currentState = RETRACTED;
 sensorState previousState = NONE;
 
 // To A4988 driver
+// Remember to connect RST pin to 3.3v HIGH
 const int DIR_PIN = 2;  // Motor CW or CCW
 const int STEP_PIN = 3;  // Freq of pulses sent to `STEP_PIN` defines motor speed
+const int SLEEP_PIN = 4;
 
 // Limit Switches
-const int LIM_SWITCH_BOT = 4;
-const int LIM_SWITCH_TOP = 5;
+const int LIM_SWITCH_BOT = 6;
+const int LIM_SWITCH_TOP = 7;
 
 // Moisture sensor
 const int MOISTURE = 13;  // This is an analog pin
@@ -44,6 +46,20 @@ void setup() {
   pinMode(LIM_SWITCH_TOP, OUTPUT);
   pinMode(LIM_SWITCH_BOT, OUTPUT);
   pinMode(MOISTURE, OUTPUT);
+  pinMode(SLEEP_PIN, OUTPUT);
+}
+
+void sleepStepper() {
+  // Logic low puts device into sleep mode
+  digitalWrite(SLEEP_PIN, LOW);
+}
+
+void awakenStepper() {
+  // Logic high enables normal operation
+  digitalWrite(SLEEP_PIN, HIGH);
+  // in order to allow the charge pump to stabilize, provide a delay of 1 ms before issuing a Step comman
+  // SLP pin should be high by default
+  delay(1);
 }
 
 // Send one pulse to the stepper motor which moves the motor by a tiny bit
@@ -65,6 +81,9 @@ void spinMotorCCW() {
 }
 
 void loop() {
+  // Put stepper in sleep mode by default
+  sleepStepper();
+
   // State table
   switch (currentState) {
 
@@ -78,6 +97,7 @@ void loop() {
       break;
 
     case EXTENDING:
+      awakenStepper();  // Activate stepper
       spinMotorCW();
       // Should be fine because independent of other subsystem
       // While the bottom is not hit
@@ -104,6 +124,7 @@ void loop() {
       break;
 
     case RETRACTING:
+      awakenStepper();  // Activate stepper
       spinMotorCCW();
       // While the top is not hit
       while (!digitalRead(LIM_SWITCH_TOP)) {
@@ -117,6 +138,9 @@ void loop() {
       currentState = RETRACTED;
       break;
   }
+
+  // Put stepper in sleep mode after performing necessary movements
+  sleepStepper();
 }
 
 /*
