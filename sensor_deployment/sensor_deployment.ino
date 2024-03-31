@@ -146,30 +146,3 @@ void loop() {
   // Put stepper in sleep mode after performing necessary movements
   sleepStepper();
 }
-
-/*
-void loop_test() {
-	// Spin motor slowly
-	for(int x = 0; x < STEPS_PER_REVOLUTION; x++)
-	{
-		digitalWrite(STEP_PIN, HIGH);
-		delayMicroseconds(2000);
-		digitalWrite(STEP_PIN, LOW);
-		delayMicroseconds(2000);
-	}
-	delay(1000); // Wait a second
-	
-	// Set motor direction counterclockwise
-	digitalWrite(DIR_PIN, LOW);
-
-	// Spin motor quickly
-	for(int x = 0; x < STEPS_PER_REVOLUTION; x++)
-	{
-		digitalWrite(STEP_PIN, HIGH);
-		delayMicroseconds(1000);
-		digitalWrite(STEP_PIN, LOW);
-		delayMicroseconds(1000);
-	}
-	delay(1000); // Wait a second
-}
-*/
