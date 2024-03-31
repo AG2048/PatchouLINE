@@ -36,7 +36,7 @@ const int LIM_SWITCH_BOT = 6;
 const int LIM_SWITCH_TOP = 7;
 
 // Moisture sensor
-const int MOISTURE = 13;  // This is an analog pin
+const int MOISTURE = A0;  // This is an analog pin
 
 // Other global variables
 const int STEPS_PER_REVOLUTION = 200;  // Set to match NEMA 17 specs + config
