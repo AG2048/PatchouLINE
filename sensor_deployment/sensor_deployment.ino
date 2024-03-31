@@ -5,6 +5,9 @@ Controls a NEMA 17 stepper motor with an A4988 driver module. Uses as little ext
 
 Resources:
 - https://lastminuteengineers.com/a4988-stepper-motor-driver-arduino-tutorial/
+- https://www.youtube.com/watch?v=7spK_BkMJys
+- https://www.pololu.com/file/0J450/a4988_DMOS_microstepping_driver_with_translator.pdf
+- https://www.reddit.com/r/arduino/comments/124iace/why_nema17_stepper_motor_with_drv8225_vibrates/
 */
 
 typedef enum {
@@ -47,6 +50,7 @@ void setup() {
   pinMode(LIM_SWITCH_BOT, OUTPUT);
   pinMode(MOISTURE, OUTPUT);
   pinMode(SLEEP_PIN, OUTPUT);
+  Serial.begin(9600);
 }
 
 void sleepStepper() {
