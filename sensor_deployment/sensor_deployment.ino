@@ -30,6 +30,7 @@ sensorState previousState = NONE;
 const int DIR_PIN = 2;  // Motor CW or CCW
 const int STEP_PIN = 3;  // Freq of pulses sent to `STEP_PIN` defines motor speed
 const int SLEEP_PIN = 4;
+const int TEST_READY_BUTTON_PIN = 5;
 
 // Limit Switches
 const int LIM_SWITCH_BOT = 11;
@@ -40,8 +41,8 @@ const int MOISTURE = A0;  // This is an analog pin
 
 // Other global variables
 const int STEPS_PER_REVOLUTION = 200;  // Set to match NEMA 17 specs + config
-const int MAX_MOISTURE_DATA_PTS = 1000;
-const bool READY_TO_READ = true;  // At right place and right time to deploy sensor
+const int MAX_MOISTURE_DATA_PTS = 10000;
+// const bool ready_to_read = false;  // At right place and right time to deploy sensor
 
 void setup() {
   pinMode(STEP_PIN, OUTPUT);
@@ -50,6 +51,7 @@ void setup() {
   pinMode(LIM_SWITCH_BOT, INPUT);
   pinMode(MOISTURE, OUTPUT);
   pinMode(SLEEP_PIN, OUTPUT);
+  pinMode(TEST_READY_BUTTON_PIN, INPUT);
   Serial.begin(9600);
 }
 
@@ -103,7 +105,6 @@ void test_limit_switch() {
 // }
 
 void loop() {
-  Serial.println("bruh")
   // Put stepper in sleep mode by default
   sleepStepper();
   // RETRACTED,
@@ -120,8 +121,10 @@ void loop() {
   switch (currentState) {
 
     case RETRACTED:{      // Movement subsystem polling
-      // TODO READY_TO_READ = digitalRead(...);
-      if (READY_TO_READ) {
+      // TODO ready_to_read = digitalRead(...);
+      // Temp pin for button
+      int ready_to_read = digitalRead(TEST_READY_BUTTON_PIN);
+      if (ready_to_read) {
         // TODO Send a signal to the comms team that the deployment system is ready
         currentState = EXTENDING;
       }
@@ -145,13 +148,13 @@ void loop() {
     case MEASURING:
 {      // Turns the "listener" on 
       int tot = 0;
-      Serial.println("Reading...");
+      Serial.print("Reading... ");
+      // The time it takes to read 100000 data points is not actually that long
       for (int i = 0; i < MAX_MOISTURE_DATA_PTS; i++) {
-        Serial.print(analogRead(MOISTURE));
-        Serial.print(" ");
         tot += analogRead(MOISTURE);
       }
       tot /= MAX_MOISTURE_DATA_PTS;
+      Serial.println(tot);
       // TODO Send data to the comms team
       currentState = RETRACTING;
       break;}
