@@ -36,12 +36,12 @@ const int LIM_SWITCH_BOT = 6;
 const int LIM_SWITCH_TOP = 7;
 
 // Moisture sensor
-const int MOISTURE = A0;  // This is an analog pin
+const int MOISTURE = 13;  // This is an analog pin
 
 // Other global variables
 const int STEPS_PER_REVOLUTION = 200;  // Set to match NEMA 17 specs + config
 const int MAX_MOISTURE_DATA_PTS = 1000;
-const bool READY_TO_READ = false;  // At right place and right time to deploy sensor
+const bool READY_TO_READ = true;  // At right place and right time to deploy sensor
 
 void setup() {
   pinMode(STEP_PIN, OUTPUT);
@@ -67,7 +67,7 @@ void awakenStepper() {
 }
 
 // Send one pulse to the stepper motor which moves the motor by a tiny bit
-void stepperStep(microsecondDelay) {
+void stepperStep(int microsecondDelay) {
   digitalWrite(STEP_PIN, HIGH);
   delayMicroseconds(microsecondDelay);
   digitalWrite(STEP_PIN, LOW);
@@ -91,17 +91,16 @@ void loop() {
   // State table
   switch (currentState) {
 
-    case RETRACTED:
-      // Movement subsystem polling
+    case RETRACTED:{      // Movement subsystem polling
       // TODO READY_TO_READ = digitalRead(...);
       if (READY_TO_READ) {
         // TODO Send a signal to the comms team that the deployment system is ready
         currentState = EXTENDING;
       }
-      break;
+      break;}
 
     case EXTENDING:
-      awakenStepper();  // Activate stepper
+      {awakenStepper();  // Activate stepper
       spinMotorCW();
       // Should be fine because independent of other subsystem
       // While the bottom is not hit
@@ -110,25 +109,24 @@ void loop() {
       }
       // After hitting the bottom
       currentState = EXTENDED;
-      break;
-
+      break;}
     case EXTENDED:
-      currentState = MEASURING;
-      break;
+{      currentState = MEASURING;
+      break;}
 
     case MEASURING:
-      // Turns the "listener" on
-      int sum = 0;
+{      // Turns the "listener" on 
+      int tot = 0;
       for (int i = 0; i < MAX_MOISTURE_DATA_PTS; i++) {
-        sum += analogRead(MOISTURE);
+        tot += analogRead(MOISTURE);
       }
-      sum /= MAX_MOISTURE_DATA_PTS;
+      tot /= MAX_MOISTURE_DATA_PTS;
       // TODO Send data to the comms team
       currentState = RETRACTING;
-      break;
+      break;}
 
     case RETRACTING:
-      awakenStepper();  // Activate stepper
+{      awakenStepper();  // Activate stepper
       spinMotorCCW();
       // While the top is not hit
       while (!digitalRead(LIM_SWITCH_TOP)) {
@@ -136,11 +134,11 @@ void loop() {
       }
       // After hitting the top
       currentState = RETRACTED;
-      break;
+      break;}
 
     default:
-      currentState = RETRACTED;
-      break;
+{      currentState = RETRACTED;
+      break;}
   }
 
   // Put stepper in sleep mode after performing necessary movements
