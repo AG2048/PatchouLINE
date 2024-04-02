@@ -32,11 +32,11 @@ const int STEP_PIN = 3;  // Freq of pulses sent to `STEP_PIN` defines motor spee
 const int SLEEP_PIN = 4;
 
 // Limit Switches
-const int LIM_SWITCH_BOT = 6;
-const int LIM_SWITCH_TOP = 7;
+const int LIM_SWITCH_BOT = 11;
+const int LIM_SWITCH_TOP = 12;
 
 // Moisture sensor
-const int MOISTURE = 13;  // This is an analog pin
+const int MOISTURE = A0;  // This is an analog pin
 
 // Other global variables
 const int STEPS_PER_REVOLUTION = 200;  // Set to match NEMA 17 specs + config
@@ -46,8 +46,8 @@ const bool READY_TO_READ = true;  // At right place and right time to deploy sen
 void setup() {
   pinMode(STEP_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
-  pinMode(LIM_SWITCH_TOP, OUTPUT);
-  pinMode(LIM_SWITCH_BOT, OUTPUT);
+  pinMode(LIM_SWITCH_TOP, INPUT);
+  pinMode(LIM_SWITCH_BOT, INPUT);
   pinMode(MOISTURE, OUTPUT);
   pinMode(SLEEP_PIN, OUTPUT);
   Serial.begin(9600);
@@ -67,15 +67,16 @@ void awakenStepper() {
 }
 
 // Send one pulse to the stepper motor which moves the motor by a tiny bit
-void stepperStep(int microsecondDelay) {
+void stepperStep(int msDelay) {
   digitalWrite(STEP_PIN, HIGH);
-  delayMicroseconds(microsecondDelay);
+  delay(msDelay);
   digitalWrite(STEP_PIN, LOW);
-  delayMicroseconds(microsecondDelay);
+  delay(msDelay);
 }
 
 // Move piston down
 void spinMotorCW() {
+  // HIGH is 3.3 volts (confirmed with DMM)
   digitalWrite(DIR_PIN, HIGH);
 }
 
@@ -84,9 +85,36 @@ void spinMotorCCW() {
   digitalWrite(DIR_PIN, LOW);
 }
 
+void test_limit_switch() {
+  Serial.print(digitalRead(LIM_SWITCH_TOP));
+  Serial.print(" ");
+  Serial.println(digitalRead(LIM_SWITCH_BOT));
+  delay(25);
+}
+
+// void loop() {
+//   awakenStepper();
+//   spinMotorCW();
+//   while (true) {
+//     stepperStep(2);
+//   }
+//   // // test_limit_switch();
+//   // // spinMotorCW();
+// }
+
 void loop() {
+  Serial.println("bruh")
   // Put stepper in sleep mode by default
   sleepStepper();
+  // RETRACTED,
+  // EXTENDING,
+  // EXTENDED,
+  // MEASURING,
+  // DATA_SENDING,
+  // RETRACTING,
+  // NONE,
+  // NUM_STATES
+  Serial.println(currentState);
 
   // State table
   switch (currentState) {
@@ -105,7 +133,7 @@ void loop() {
       // Should be fine because independent of other subsystem
       // While the bottom is not hit
       while (!digitalRead(LIM_SWITCH_BOT)) {
-        stepperStep(1000);
+        stepperStep(2);
       }
       // After hitting the bottom
       currentState = EXTENDED;
@@ -117,7 +145,10 @@ void loop() {
     case MEASURING:
 {      // Turns the "listener" on 
       int tot = 0;
+      Serial.println("Reading...");
       for (int i = 0; i < MAX_MOISTURE_DATA_PTS; i++) {
+        Serial.print(analogRead(MOISTURE));
+        Serial.print(" ");
         tot += analogRead(MOISTURE);
       }
       tot /= MAX_MOISTURE_DATA_PTS;
@@ -130,7 +161,7 @@ void loop() {
       spinMotorCCW();
       // While the top is not hit
       while (!digitalRead(LIM_SWITCH_TOP)) {
-        stepperStep(1000);
+        stepperStep(2);
       }
       // After hitting the top
       currentState = RETRACTED;
