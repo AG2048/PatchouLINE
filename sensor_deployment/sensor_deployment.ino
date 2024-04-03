@@ -30,26 +30,28 @@ sensorState previousState = NONE;
 const int DIR_PIN = 2;  // Motor CW or CCW
 const int STEP_PIN = 3;  // Freq of pulses sent to `STEP_PIN` defines motor speed
 const int SLEEP_PIN = 4;
+const int TEST_READY_BUTTON_PIN = 5;
 
 // Limit Switches
-const int LIM_SWITCH_BOT = 6;
-const int LIM_SWITCH_TOP = 7;
+const int LIM_SWITCH_BOT = 11;
+const int LIM_SWITCH_TOP = 12;
 
 // Moisture sensor
-const int MOISTURE = 13;  // This is an analog pin
+const int MOISTURE = A0;  // This is an analog pin
 
 // Other global variables
 const int STEPS_PER_REVOLUTION = 200;  // Set to match NEMA 17 specs + config
-const int MAX_MOISTURE_DATA_PTS = 1000;
-const bool READY_TO_READ = false;  // At right place and right time to deploy sensor
+const int MAX_MOISTURE_DATA_PTS = 250000;
+// const bool ready_to_read = false;  // At right place and right time to deploy sensor
 
 void setup() {
   pinMode(STEP_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
-  pinMode(LIM_SWITCH_TOP, OUTPUT);
-  pinMode(LIM_SWITCH_BOT, OUTPUT);
+  pinMode(LIM_SWITCH_TOP, INPUT);
+  pinMode(LIM_SWITCH_BOT, INPUT);
   pinMode(MOISTURE, OUTPUT);
   pinMode(SLEEP_PIN, OUTPUT);
+  pinMode(TEST_READY_BUTTON_PIN, INPUT);
   Serial.begin(9600);
 }
 
@@ -67,15 +69,16 @@ void awakenStepper() {
 }
 
 // Send one pulse to the stepper motor which moves the motor by a tiny bit
-void stepperStep(microsecondDelay) {
+void stepperStep(int msDelay) {
   digitalWrite(STEP_PIN, HIGH);
-  delayMicroseconds(microsecondDelay);
+  delay(msDelay);
   digitalWrite(STEP_PIN, LOW);
-  delayMicroseconds(microsecondDelay);
+  delay(msDelay);
 }
 
 // Move piston down
 void spinMotorCW() {
+  // HIGH is 3.3 volts (confirmed with DMM)
   digitalWrite(DIR_PIN, HIGH);
 }
 
@@ -84,63 +87,93 @@ void spinMotorCCW() {
   digitalWrite(DIR_PIN, LOW);
 }
 
+void test_limit_switch() {
+  Serial.print(digitalRead(LIM_SWITCH_TOP));
+  Serial.print(" ");
+  Serial.println(digitalRead(LIM_SWITCH_BOT));
+  delay(25);
+}
+
+// void loop() {
+//   awakenStepper();
+//   spinMotorCW();
+//   while (true) {
+//     stepperStep(2);
+//   }
+//   // // test_limit_switch();
+//   // // spinMotorCW();
+// }
+
 void loop() {
   // Put stepper in sleep mode by default
   sleepStepper();
+  // RETRACTED    0,
+  // EXTENDING    1,
+  // EXTENDED     2,
+  // MEASURING    3,
+  // DATA_SENDING 4,
+  // RETRACTING   5,
+  // NONE         6,
+  // NUM_STATES   7
+  Serial.println(currentState);
 
   // State table
   switch (currentState) {
 
-    case RETRACTED:
-      // Movement subsystem polling
-      // TODO READY_TO_READ = digitalRead(...);
-      if (READY_TO_READ) {
+    case RETRACTED:{      // Movement subsystem polling
+      // TODO ready_to_read = digitalRead(...);
+      // Temp pin for button
+      int ready_to_read = digitalRead(TEST_READY_BUTTON_PIN);
+      if (ready_to_read) {
         // TODO Send a signal to the comms team that the deployment system is ready
         currentState = EXTENDING;
       }
-      break;
+      break;}
 
     case EXTENDING:
-      awakenStepper();  // Activate stepper
+      {awakenStepper();  // Activate stepper
       spinMotorCW();
       // Should be fine because independent of other subsystem
       // While the bottom is not hit
       while (!digitalRead(LIM_SWITCH_BOT)) {
-        stepperStep(1000);
+        stepperStep(1);
       }
       // After hitting the bottom
       currentState = EXTENDED;
-      break;
-
+      break;}
     case EXTENDED:
-      currentState = MEASURING;
-      break;
+{      currentState = MEASURING;
+      break;}
 
     case MEASURING:
-      // Turns the "listener" on
-      int sum = 0;
+{      // Turns the "listener" on 
+      int tot = 0;
+      Serial.print("Reading... ");
+      // The time it takes to read 10000 data points is not actually that long
+      // 100000 points adds a slight delay to give illusion of it "processing"
       for (int i = 0; i < MAX_MOISTURE_DATA_PTS; i++) {
-        sum += analogRead(MOISTURE);
+        tot += analogRead(MOISTURE);
       }
-      sum /= MAX_MOISTURE_DATA_PTS;
+      tot /= MAX_MOISTURE_DATA_PTS;
+      Serial.println(tot);
       // TODO Send data to the comms team
       currentState = RETRACTING;
-      break;
+      break;}
 
     case RETRACTING:
-      awakenStepper();  // Activate stepper
+{      awakenStepper();  // Activate stepper
       spinMotorCCW();
       // While the top is not hit
       while (!digitalRead(LIM_SWITCH_TOP)) {
-        stepperStep(1000);
+        stepperStep(1);
       }
       // After hitting the top
       currentState = RETRACTED;
-      break;
+      break;}
 
     default:
-      currentState = RETRACTED;
-      break;
+{      currentState = RETRACTED;
+      break;}
   }
 
   // Put stepper in sleep mode after performing necessary movements
