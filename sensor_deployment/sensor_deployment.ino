@@ -41,7 +41,7 @@ const int MOISTURE = A0;  // This is an analog pin
 
 // Other global variables
 const int STEPS_PER_REVOLUTION = 200;  // Set to match NEMA 17 specs + config
-const int MAX_MOISTURE_DATA_PTS = 10000;
+const int MAX_MOISTURE_DATA_PTS = 250000;
 // const bool ready_to_read = false;  // At right place and right time to deploy sensor
 
 void setup() {
@@ -107,14 +107,14 @@ void test_limit_switch() {
 void loop() {
   // Put stepper in sleep mode by default
   sleepStepper();
-  // RETRACTED,
-  // EXTENDING,
-  // EXTENDED,
-  // MEASURING,
-  // DATA_SENDING,
-  // RETRACTING,
-  // NONE,
-  // NUM_STATES
+  // RETRACTED    0,
+  // EXTENDING    1,
+  // EXTENDED     2,
+  // MEASURING    3,
+  // DATA_SENDING 4,
+  // RETRACTING   5,
+  // NONE         6,
+  // NUM_STATES   7
   Serial.println(currentState);
 
   // State table
@@ -136,7 +136,7 @@ void loop() {
       // Should be fine because independent of other subsystem
       // While the bottom is not hit
       while (!digitalRead(LIM_SWITCH_BOT)) {
-        stepperStep(2);
+        stepperStep(1);
       }
       // After hitting the bottom
       currentState = EXTENDED;
@@ -149,7 +149,8 @@ void loop() {
 {      // Turns the "listener" on 
       int tot = 0;
       Serial.print("Reading... ");
-      // The time it takes to read 100000 data points is not actually that long
+      // The time it takes to read 10000 data points is not actually that long
+      // 100000 points adds a slight delay to give illusion of it "processing"
       for (int i = 0; i < MAX_MOISTURE_DATA_PTS; i++) {
         tot += analogRead(MOISTURE);
       }
@@ -164,7 +165,7 @@ void loop() {
       spinMotorCCW();
       // While the top is not hit
       while (!digitalRead(LIM_SWITCH_TOP)) {
-        stepperStep(2);
+        stepperStep(1);
       }
       // After hitting the top
       currentState = RETRACTED;
