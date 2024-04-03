@@ -15,7 +15,6 @@ typedef enum {
   EXTENDING,
   EXTENDED,
   MEASURING,
-  DATA_SENDING,
   RETRACTING,
   NONE,
   NUM_STATES
@@ -94,16 +93,6 @@ void test_limit_switch() {
   delay(25);
 }
 
-// void loop() {
-//   awakenStepper();
-//   spinMotorCW();
-//   while (true) {
-//     stepperStep(2);
-//   }
-//   // // test_limit_switch();
-//   // // spinMotorCW();
-// }
-
 void loop() {
   // Put stepper in sleep mode by default
   sleepStepper();
@@ -111,16 +100,18 @@ void loop() {
   // EXTENDING    1,
   // EXTENDED     2,
   // MEASURING    3,
-  // DATA_SENDING 4,
-  // RETRACTING   5,
-  // NONE         6,
-  // NUM_STATES   7
+  // RETRACTING   4,
+  // NONE         5,
+  // NUM_STATES   6
   Serial.println(currentState);
 
   // State table
   switch (currentState) {
 
-    case RETRACTED:{      // Movement subsystem polling
+    // 0
+    case RETRACTED:
+    {      
+      // Movement subsystem polling
       // TODO ready_to_read = digitalRead(...);
       // Temp pin for button
       int ready_to_read = digitalRead(TEST_READY_BUTTON_PIN);
@@ -128,10 +119,13 @@ void loop() {
         // TODO Send a signal to the comms team that the deployment system is ready
         currentState = EXTENDING;
       }
-      break;}
+      break;
+    }
 
+    // 1
     case EXTENDING:
-      {awakenStepper();  // Activate stepper
+    {
+      awakenStepper();  // Activate stepper
       spinMotorCW();
       // Should be fine because independent of other subsystem
       // While the bottom is not hit
@@ -140,13 +134,20 @@ void loop() {
       }
       // After hitting the bottom
       currentState = EXTENDED;
-      break;}
-    case EXTENDED:
-{      currentState = MEASURING;
-      break;}
+      break;
+    }
 
+    // 2
+    case EXTENDED:
+    {
+      currentState = MEASURING;
+      break;
+    }
+
+    // 3
     case MEASURING:
-{      // Turns the "listener" on 
+    {      
+      // Turns the "listener" on 
       int tot = 0;
       Serial.print("Reading... ");
       // The time it takes to read 10000 data points is not actually that long
@@ -158,10 +159,13 @@ void loop() {
       Serial.println(tot);
       // TODO Send data to the comms team
       currentState = RETRACTING;
-      break;}
+      break;
+    }
 
+    // 4
     case RETRACTING:
-{      awakenStepper();  // Activate stepper
+    { 
+      awakenStepper();  // Activate stepper
       spinMotorCCW();
       // While the top is not hit
       while (!digitalRead(LIM_SWITCH_TOP)) {
@@ -169,11 +173,14 @@ void loop() {
       }
       // After hitting the top
       currentState = RETRACTED;
-      break;}
+      break;
+    }
 
     default:
-{      currentState = RETRACTED;
-      break;}
+    {
+      currentState = RETRACTED;
+      break;
+    }
   }
 
   // Put stepper in sleep mode after performing necessary movements
