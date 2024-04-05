@@ -130,7 +130,7 @@ int deploySensorProcess() {
     // RETRACTING   4,
     // NONE         5,
     // NUM_STATES   6
-    serial.print("State: ")
+    Serial.print("State: ");
     Serial.println(currentState);
 
     // State table
