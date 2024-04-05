@@ -27,6 +27,8 @@ sensorState previousState = NONE;
 // Some global variables
 int moistureReading = 0;
 bool deploymentFinish = false;
+bool newData = false;
+int moistureLevels[4] = {0, 0, 0, 0};
 
 // To A4988 driver
 // Remember to connect RST pin to 3.3v HIGH
@@ -119,8 +121,6 @@ int deploySensorProcess() {
   moistureReading = 0;
 
   while (!deploymentFinish) {
-    // Deployment has started
-    digitalWrite(DEPLOYMENT_FINISH_PIN, LOW);
     // Put stepper in sleep mode by default
     sleepStepper();
     // RETRACTED    0,
@@ -142,7 +142,9 @@ int deploySensorProcess() {
         // Temp pin for button
         int ready_to_read = digitalRead(READY_BUTTON_PIN);
         int first_time = digitalRead(FIRST_TIME_PIN);
+        digitalWrite(DEPLOYMENT_FINISH_PIN, HIGH);
         if (ready_to_read) {
+          digitalWrite(DEPLOYMENT_FINISH_PIN, LOW);
           Serial.print("ready_to_read: ");
           Serial.println(ready_to_read);
           Serial.print("first_time: ");
@@ -193,6 +195,8 @@ int deploySensorProcess() {
         }
         moistureReading /= MAX_MOISTURE_DATA_PTS;
         Serial.println(moistureReading);
+        moistureLevels[plot_index] = moistureReading;
+        newData = true;
         // TODO Send data to the comms team
         currentState = RETRACTING;
         break;
@@ -200,7 +204,7 @@ int deploySensorProcess() {
 
       // 4
       case RETRACTING:
-      { 
+      {
         awakenStepper();  // Activate stepper
         setMotorSpinCCW();
         // While the top is not hit
@@ -211,7 +215,6 @@ int deploySensorProcess() {
         currentState = RETRACTED;
         // Finished deployment, back in retracted state
         deploymentFinish = true;
-        digitalWrite(DEPLOYMENT_FINISH_PIN, HIGH);
         break;
       }
 
