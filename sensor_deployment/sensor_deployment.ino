@@ -69,6 +69,15 @@ void setup() {
   pinMode(MOISTURE, OUTPUT);
 
   Serial.begin(9600);
+
+  // Read top dep switch
+  // Is it pushed in?
+  // If not
+  // Set current state = retracting
+  // Set digitalwrite(READY, LOW)
+  // Always do this, works out
+  currentState = RETRACTING;
+  digitalWrite(DEPLOYMENT_FINISH_PIN, LOW);
 }
 
 void sleepStepper() {
@@ -114,122 +123,114 @@ void testLimitSwith() {
 //   testLimitSwith();
 // }
 
-int deploySensorProcess() {
-  delay(500);
+void deploySensorProcess() {
   // Re-init the global variables
-  deploymentFinish = false;  // If we call -> deployment is not finished because its in progress
   moistureReading = 0;
 
-  while (!deploymentFinish) {
-    // Put stepper in sleep mode by default
-    sleepStepper();
-    // RETRACTED    0,
-    // EXTENDING    1,
-    // EXTENDED     2,
-    // MEASURING    3,
-    // RETRACTING   4,
-    // NONE         5,
-    // NUM_STATES   6
-    Serial.print("State: ");
-    Serial.println(currentState);
+  // Put stepper in sleep mode by default
+  sleepStepper();
+  // RETRACTED    0,
+  // EXTENDING    1,
+  // EXTENDED     2,
+  // MEASURING    3,
+  // RETRACTING   4,
+  // NONE         5,
+  // NUM_STATES   6
+  Serial.print("State: ");
+  Serial.println(currentState);
 
-    // State table
-    switch (currentState) {
-      case RETRACTED:
-      {
-        // Movement subsystem polling
-        // TODO ready_to_read = digitalRead(...);
-        // Temp pin for button
-        int ready_to_read = digitalRead(READY_BUTTON_PIN);
-        int first_time = digitalRead(FIRST_TIME_PIN);
-        digitalWrite(DEPLOYMENT_FINISH_PIN, HIGH);
-        if (ready_to_read) {
-          digitalWrite(DEPLOYMENT_FINISH_PIN, LOW);
-          Serial.print("ready_to_read: ");
-          Serial.println(ready_to_read);
-          Serial.print("first_time: ");
-          Serial.println(first_time);
-          if (first_time)
-            plot_index = 0;
-          else
-            plot_index = (plot_index + 1) % 4;
-          // TODO Send a signal to the comms team that the deployment system is ready
-          currentState = EXTENDING;
-        }
-        Serial.print("Plot_index: ");
-        Serial.println(plot_index);
-        break;
+  // State table
+  switch (currentState) {
+    case RETRACTED:
+    {
+      // Movement subsystem polling
+      // TODO ready_to_read = digitalRead(...);
+      // Temp pin for button
+      int ready_to_read = digitalRead(READY_BUTTON_PIN);
+      int first_time = digitalRead(FIRST_TIME_PIN);
+      digitalWrite(DEPLOYMENT_FINISH_PIN, HIGH);
+      if (ready_to_read) {
+        digitalWrite(DEPLOYMENT_FINISH_PIN, LOW);
+        Serial.print("ready_to_read: ");
+        Serial.println(ready_to_read);
+        Serial.print("first_time: ");
+        Serial.println(first_time);
+        if (first_time)
+          plot_index = 0;
+        else
+          plot_index = (plot_index + 1) % 4;
+        // TODO Send a signal to the comms team that the deployment system is ready
+        currentState = EXTENDING;
       }
-
-      // 1
-      case EXTENDING:
-      {
-        awakenStepper();  // Activate stepper
-        setMotorSpinCW();
-        // Should be fine because independent of other subsystem
-        // While the bottom is not hit
-        while (!digitalRead(LIM_SWITCH_BOT)) {
-          stepperStep(1);
-        }
-        // After hitting the bottom
-        currentState = EXTENDED;
-        break;
-      }
-
-      // 2
-      case EXTENDED:
-      {
-        currentState = MEASURING;
-        break;
-      }
-
-      // 3
-      case MEASURING:
-      {      
-        // Turns the "listener" on 
-        Serial.print("Reading... ");
-        // The time it takes to read 10000 data points is not actually that long
-        // 100000 points adds a slight delay to give illusion of it "processing"
-        for (int i = 0; i < MAX_MOISTURE_DATA_PTS; i++) {
-          moistureReading += analogRead(MOISTURE);
-        }
-        moistureReading /= MAX_MOISTURE_DATA_PTS;
-        Serial.println(moistureReading);
-        moistureLevels[plot_index] = moistureReading;
-        newData = true;
-        // TODO Send data to the comms team
-        currentState = RETRACTING;
-        break;
-      }
-
-      // 4
-      case RETRACTING:
-      {
-        awakenStepper();  // Activate stepper
-        setMotorSpinCCW();
-        // While the top is not hit
-        while (!digitalRead(LIM_SWITCH_TOP)) {
-          stepperStep(1);
-        }
-        // After hitting the top
-        currentState = RETRACTED;
-        // Finished deployment, back in retracted state
-        deploymentFinish = true;
-        break;
-      }
-
-      default:
-      {
-        currentState = RETRACTED;
-        break;
-      }
+      Serial.print("Plot_index: ");
+      Serial.println(plot_index);
+      break;
     }
 
-    // Put stepper in sleep mode after performing necessary movements
-    sleepStepper();
+    // 1
+    case EXTENDING:
+    {
+      awakenStepper();  // Activate stepper
+      setMotorSpinCW();
+      // Should be fine because independent of other subsystem
+      // While the bottom is not hit
+      while (!digitalRead(LIM_SWITCH_BOT)) {
+        stepperStep(1);
+      }
+      // After hitting the bottom
+      currentState = EXTENDED;
+      break;
+    }
+
+    // 2
+    case EXTENDED:
+    {
+      currentState = MEASURING;
+      break;
+    }
+
+    // 3
+    case MEASURING:
+    {      
+      // Turns the "listener" on 
+      Serial.print("Reading... ");
+      // The time it takes to read 10000 data points is not actually that long
+      // 100000 points adds a slight delay to give illusion of it "processing"
+      for (int i = 0; i < MAX_MOISTURE_DATA_PTS; i++) {
+        moistureReading += analogRead(MOISTURE);
+      }
+      moistureReading /= MAX_MOISTURE_DATA_PTS;
+      Serial.println(moistureReading);
+      moistureLevels[plot_index] = moistureReading;
+      newData = true;
+      // TODO Send data to the comms team
+      currentState = RETRACTING;
+      break;
+    }
+
+    // 4
+    case RETRACTING:
+    {
+      awakenStepper();  // Activate stepper
+      setMotorSpinCCW();
+      // While the top is not hit
+      while (!digitalRead(LIM_SWITCH_TOP)) {
+        stepperStep(1);
+      }
+      // After hitting the top
+      currentState = RETRACTED;
+      break;
+    }
+
+    default:
+    {
+      currentState = RETRACTED;
+      break;
+    }
   }
 
-  return moistureReading;
+  // Put stepper in sleep mode after performing necessary movements
+  sleepStepper();
 }
 
 void loop() {
