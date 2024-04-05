@@ -33,10 +33,15 @@ bool deploymentFinish = false;
 const int DIR_PIN = 2;  // Motor CW or CCW
 const int STEP_PIN = 3;  // Freq of pulses sent to `STEP_PIN` defines motor speed
 const int SLEEP_PIN = 4;
-const int TEST_READY_BUTTON_PIN = 5;
+
+// To other subsystems
+const int READY_BUTTON_PIN = 5;  // When deployment starts
+const int FIRST_TIME_PIN = 6;  // When the cart just leaves the track
+const int DEPLOYMENT_FINISH_PIN = 7;  // One cycle of deployment
+int plot_index = 0;
 
 // Limit Switches
-const int LIM_SWITCH_BOT = 11;
+const int LIM_SWITCH_BOT = 10;
 const int LIM_SWITCH_TOP = 12;
 
 // Moisture sensor
@@ -50,11 +55,17 @@ const int MAX_MOISTURE_DATA_PTS = 250000;
 void setup() {
   pinMode(STEP_PIN, OUTPUT);
   pinMode(DIR_PIN, OUTPUT);
+  pinMode(SLEEP_PIN, OUTPUT);
+
+  pinMode(READY_BUTTON_PIN, INPUT);
+  pinMode(FIRST_TIME_PIN, INPUT);
+  pinMode(DEPLOYMENT_FINISH_PIN, OUTPUT);
+
   pinMode(LIM_SWITCH_TOP, INPUT);
   pinMode(LIM_SWITCH_BOT, INPUT);
+
   pinMode(MOISTURE, OUTPUT);
-  pinMode(SLEEP_PIN, OUTPUT);
-  pinMode(TEST_READY_BUTTON_PIN, INPUT);
+
   Serial.begin(9600);
 }
 
@@ -97,12 +108,19 @@ void testLimitSwith() {
   delay(25);
 }
 
-void deploySensorProcess() {
+// void loop() {
+//   testLimitSwith();
+// }
+
+int deploySensorProcess() {
+  delay(500);
   // Re-init the global variables
   deploymentFinish = false;  // If we call -> deployment is not finished because its in progress
   moistureReading = 0;
 
   while (!deploymentFinish) {
+    // Deployment has started
+    digitalWrite(DEPLOYMENT_FINISH_PIN, LOW);
     // Put stepper in sleep mode by default
     sleepStepper();
     // RETRACTED    0,
@@ -112,22 +130,32 @@ void deploySensorProcess() {
     // RETRACTING   4,
     // NONE         5,
     // NUM_STATES   6
+    serial.print("State: ")
     Serial.println(currentState);
 
     // State table
     switch (currentState) {
-
-      // 0
       case RETRACTED:
-      {      
+      {
         // Movement subsystem polling
         // TODO ready_to_read = digitalRead(...);
         // Temp pin for button
-        int ready_to_read = digitalRead(TEST_READY_BUTTON_PIN);
+        int ready_to_read = digitalRead(READY_BUTTON_PIN);
+        int first_time = digitalRead(FIRST_TIME_PIN);
         if (ready_to_read) {
+          Serial.print("ready_to_read: ");
+          Serial.println(ready_to_read);
+          Serial.print("first_time: ");
+          Serial.println(first_time);
+          if (first_time)
+            plot_index = 0;
+          else
+            plot_index = (plot_index + 1) % 4;
           // TODO Send a signal to the comms team that the deployment system is ready
           currentState = EXTENDING;
         }
+        Serial.print("Plot_index: ");
+        Serial.println(plot_index);
         break;
       }
 
@@ -164,7 +192,7 @@ void deploySensorProcess() {
           moistureReading += analogRead(MOISTURE);
         }
         moistureReading /= MAX_MOISTURE_DATA_PTS;
-        Serial.println(tot);
+        Serial.println(moistureReading);
         // TODO Send data to the comms team
         currentState = RETRACTING;
         break;
@@ -183,6 +211,7 @@ void deploySensorProcess() {
         currentState = RETRACTED;
         // Finished deployment, back in retracted state
         deploymentFinish = true;
+        digitalWrite(DEPLOYMENT_FINISH_PIN, HIGH);
         break;
       }
 
@@ -196,8 +225,11 @@ void deploySensorProcess() {
     // Put stepper in sleep mode after performing necessary movements
     sleepStepper();
   }
+
+  return moistureReading;
 }
 
 void loop() {
   deploySensorProcess();
+  //testLimitSwith();
 }
