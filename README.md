@@ -2,7 +2,7 @@
 
 Other possible names:
 
-- PatchouLine
+- PatchouLine (Patchoo - line)
 - MC-Zipline
 - Patchoul-it!
 
