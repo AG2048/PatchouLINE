@@ -1,7 +1,5 @@
-# PatchouLINE
-
 <p align="center">
-  <img src="https://github.com/AG2048/patchouli-zipline/blob/main/logo.svg" alt="PatchouLINE Logo" class="center"> 
+  <img src="https://github.com/AG2048/patchouli-zipline/blob/main/logo.svg" alt="PatchouLINE Logo" class="center" width="1200"> 
 </p>
 
 ESC204 Praxis III Engineering Design Project
