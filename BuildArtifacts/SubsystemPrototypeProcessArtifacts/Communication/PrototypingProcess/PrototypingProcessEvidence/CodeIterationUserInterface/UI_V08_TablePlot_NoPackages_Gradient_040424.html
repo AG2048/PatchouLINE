@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heatmap with Gradient Legend</title>
+    <style>
+        html, body, #container {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .heatmap {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 2px;
+            width: 400px;
+            height: 400px;
+        }
+        .plot {
+            border: 1px solid #fff;
+        }
+
+        #legend {
+            margin-top: 20px;
+            text-align: center;
+            position: relative;
+            width: 200px;
+            height: 30px;
+        }
+        .gradient {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(to right, #FFA500, #B0D8A4, #6495ED);
+        }
+        .legend-labels {
+            position: absolute;
+            top: 35px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .legend-label {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <h1><center>Moisture Levels</center></h1>
+    <!-- Heatmap -->
+    <div id="container" class="heatmap"></div>
+
+    <!-- Legend -->
+    <!-- Legend -->
+     <center>
+         <h2>Legend</h2>
+<div id="legend">
+   
+    <div class="gradient"></div>
+    <div class="legend-labels">
+        <div class="legend-label">Dry</div>
+        <div class="legend-label">Nice</div>
+        <div class="legend-label">Wet</div>
+    </div>
+  
+</div>
+ </center>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Plot dimensions
+            const xCoord = 6;
+            const yCoord = 6;
+            
+            // Container for heatmap plots
+            const container = document.getElementById("container");
+            
+            // Sensor readings
+            const moistureLevels = [3, 56, 464, 779, 567, 658, 666, 6, 345, 345, 3, 56, 464, 779, 567, 658, 666, 6, 345, 345,3, 56, 364, 779, 567, 658, 666, 6, 1000, 345,3, 56, 464, 779, 567, 658, 666, 6, 345, 845];
+            
+            // Define color stops and corresponding moisture levels
+            const colorStops = [
+                { color: "#FFA500", moistureLevel: 0 }, // Dry
+                { color: "#B0D8A4", moistureLevel: 660 }, // Nice
+                { color: "#6495ED", moistureLevel: 850 }  // Wet
+            ];
+            
+            // Generate heatmap
+            for (let i = 0; i < xCoord * yCoord; i++) {
+                const plot = document.createElement("div");
+                plot.classList.add("plot");
+                plot.dataset.x = (i % xCoord) + 1;
+                plot.dataset.y = Math.floor(i / yCoord) + 1;
+                
+                // Determine color based on moisture level
+                const moistureLevel = moistureLevels[i];
+                const color = interpolateColor(moistureLevel, colorStops);
+                
+                plot.style.backgroundColor = color;
+                
+                container.appendChild(plot);
+            }
+        });
+        
+        // Function to interpolate color based on moisture level
+        function interpolateColor(moistureLevel, colorStops) {
+            for (let i = 1; i < colorStops.length; i++) {
+                const prevStop = colorStops[i - 1];
+                const currentStop = colorStops[i];
+                
+                if (moistureLevel <= currentStop.moistureLevel) {
+                    const prevColor = prevStop.color;
+                    const currentColor = currentStop.color;
+                    const prevMoisture = prevStop.moistureLevel;
+                    const currentMoisture = currentStop.moistureLevel;
+                    
+                    // Interpolate between previous and current colors
+                    const t = (moistureLevel - prevMoisture) / (currentMoisture - prevMoisture);
+                    const interpolatedColor = interpolate(prevColor, currentColor, t);
+                    
+                    return interpolatedColor;
+                }
+            }
+            
+            // Default color (in case moisture level exceeds all stops)
+            return colorStops[colorStops.length - 1].color;
+        }
+        
+        // Function to interpolate between two colors
+        function interpolate(color1, color2, t) {
+            const r1 = parseInt(color1.substr(1, 2), 16);
+            const g1 = parseInt(color1.substr(3, 2), 16);
+            const b1 = parseInt(color1.substr(5, 2), 16);
+            const r2 = parseInt(color2.substr(1, 2), 16);
+            const g2 = parseInt(color2.substr(3, 2), 16);
+            const b2 = parseInt(color2.substr(5, 2), 16);
+            
+            const r = Math.round(r1 + (r2 - r1) * t);
+            const g = Math.round(g1 + (g2 - g1) * t);
+            const b = Math.round(b1 + (b2 - b1) * t);
+            
+            return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+        }
+        
+        function componentToHex(c) {
+            const hex = c.toString(16);
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+    </script>
+</body>
+</html>
