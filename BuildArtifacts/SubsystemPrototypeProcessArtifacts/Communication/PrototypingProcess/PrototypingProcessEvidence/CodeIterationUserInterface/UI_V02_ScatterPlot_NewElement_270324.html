@@ -1,0 +1,135 @@
+<!DOCTYPE html> 
+
+
+<html> 
+
+
+<head> 
+
+
+   <meta charset="utf-8"> 
+
+
+   <title>Second Scatter using D3!</title> 
+
+
+   <style> 
+
+
+       /* Set `circle` elements to have a "fill" of "purple" or whatever color you choose */ 
+
+
+       circle { 
+
+
+           fill: blue; 
+
+
+       } 
+
+
+       /* need to change circle colour based on reading*/ 
+
+
+       svg { 
+
+
+           border: 1px solid #f0f; 
+
+
+       } 
+
+
+   </style> 
+
+
+   <!--- Load the d3 library --> 
+
+
+   <script> 
+
+
+       src = "https://d3js.org/d3.v4.min.js"; 
+
+
+ 
+
+
+       // need to call from user input 
+
+
+       // for each new element, add a new client call that works 
+
+
+       // will need to do something like eval to change variable name each time 
+
+
+       var plotHeight = 100; 
+
+
+       var plotWidth = 100; 
+
+
+        
+
+
+        
+
+
+   </script> 
+
+
+</head> 
+
+
+ 
+
+
+<body> 
+
+
+   <p>Nutrient Plot</p> 
+
+
+ 
+
+
+   <svg id="plotSize" width=myVariable height="400"> 
+
+
+            
+
+
+           <!--- call loop outside of html to determine if size of array changed 
+
+
+           - if so add another element with the new array values--> 
+
+
+           <circle cx = "100" cy = "100" r = "5"> 
+           <circle cx = "50" cy = "50" r = "5"> 
+
+
+   <script> 
+
+
+        
+       // setting plot size variables added through user input 
+
+
+       // for each new element, add a new client call that works 
+
+
+       document.getElementById('plotSize').setAttribute('height', plotHeight); 
+
+
+       document.getElementById('plotSize').setAttribute('width', plotHeight); 
+
+
+   </script>         
+
+
+</body> 
+
+
+</html>
