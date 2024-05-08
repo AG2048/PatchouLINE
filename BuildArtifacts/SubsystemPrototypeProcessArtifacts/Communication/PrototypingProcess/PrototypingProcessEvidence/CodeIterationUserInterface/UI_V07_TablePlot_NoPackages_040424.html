@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2487.3">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.7px Arial; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
+    span.s1 {font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;title&gt;Heatmap in JavaScript&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;style&gt;</span></p>
+<p class="p1"><span class="s1">        html, body, #container {</span></p>
+<p class="p1"><span class="s1">            width: 100%;</span></p>
+<p class="p1"><span class="s1">            height: 100%;</span></p>
+<p class="p1"><span class="s1">            margin: 0;</span></p>
+<p class="p1"><span class="s1">            padding: 0;</span></p>
+<p class="p1"><span class="s1">        }</span></p>
+<p class="p1"><span class="s1">        .heatmap {</span></p>
+<p class="p1"><span class="s1">            display: grid;</span></p>
+<p class="p1"><span class="s1">            grid-template-columns: repeat(6, 1fr);</span></p>
+<p class="p1"><span class="s1">            grid-template-rows: repeat(6, 1fr);</span></p>
+<p class="p1"><span class="s1">            gap: 2px;</span></p>
+<p class="p1"><span class="s1">            width: 400px;</span></p>
+<p class="p1"><span class="s1">            height: 400px;</span></p>
+<p class="p1"><span class="s1">        }</span></p>
+<p class="p1"><span class="s1">        .plot {</span></p>
+<p class="p1"><span class="s1">            background-color: #B0D8A4;</span></p>
+<p class="p1"><span class="s1">            border: 1px solid #fff;</span></p>
+<p class="p1"><span class="s1">        }</span></p>
+<p class="p1"><span class="s1">        .plot.dry {</span></p>
+<p class="p1"><span class="s1">            background-color: #FFA500;</span></p>
+<p class="p1"><span class="s1">        }</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">        .plot.wet {</span></p>
+<p class="p1"><span class="s1">            background-color: #6495ED;</span></p>
+<p class="p1"><span class="s1">        }</span></p>
+<p class="p1"><span class="s1">        #legend {</span></p>
+<p class="p1"><span class="s1">            margin-top: 20px;</span></p>
+<p class="p1"><span class="s1">            text-align: center;</span></p>
+<p class="p1"><span class="s1">        }</span></p>
+<p class="p1"><span class="s1">        .legend-item {</span></p>
+<p class="p1"><span class="s1">            margin-right: 10px;</span></p>
+<p class="p1"><span class="s1">            display: inline-block;</span></p>
+<p class="p1"><span class="s1">        }</span></p>
+<p class="p1"><span class="s1">        .legend-color {</span></p>
+<p class="p1"><span class="s1">            width: 20px;</span></p>
+<p class="p1"><span class="s1">            height: 20px;</span></p>
+<p class="p1"><span class="s1">            display: inline-block;</span></p>
+<p class="p1"><span class="s1">            margin-right: 5px;</span></p>
+<p class="p1"><span class="s1">            border: 1px solid #ccc;</span></p>
+<p class="p1"><span class="s1">        }</span></p>
+<p class="p1"><span class="s1">    &lt;/style&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;!-- Heatmap --&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div id="container" class="heatmap"&gt;&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    &lt;!-- Legend --&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;div id="legend"&gt;</span></p>
+<p class="p1"><span class="s1">        Legend: </span></p>
+<p class="p1"><span class="s1">        &lt;div class="legend-item"&gt;</span></p>
+<p class="p1"><span class="s1">            &lt;div class="legend-color" style="background-color: #FFA500;"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">            Dry Soil</span></p>
+<p class="p1"><span class="s1">        &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">        &lt;div class="legend-item"&gt;</span></p>
+<p class="p1"><span class="s1">            &lt;div class="legend-color" style="background-color: #B0D8A4;"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">            Appropriate Moisture Level</span></p>
+<p class="p1"><span class="s1">        &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">        &lt;div class="legend-item"&gt;</span></p>
+<p class="p1"><span class="s1">            &lt;div class="legend-color" style="background-color: #6495ED;"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">            Overwatered Soil</span></p>
+<p class="p1"><span class="s1">        &lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">    &lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">    &lt;script&gt;</span></p>
+<p class="p1"><span class="s1">        document.addEventListener("DOMContentLoaded", function() {</span></p>
+<p class="p1"><span class="s1">            // Plot dimensions</span></p>
+<p class="p1"><span class="s1">            const xCoord = 6;</span></p>
+<p class="p1"><span class="s1">            const yCoord = 6;</span></p>
+<p class="p1"><span class="s1">            </span></p>
+<p class="p1"><span class="s1">            // Container for heatmap plots</span></p>
+<p class="p1"><span class="s1">            const container = document.getElementById("container");</span></p>
+<p class="p1"><span class="s1">            </span></p>
+<p class="p1"><span class="s1">            // Sensor readings</span></p>
+<p class="p1"><span class="s1">            const moistureLevels = [3, 56, 4564, 7, 567, 658, 666, 6, 345, 345];</span></p>
+<p class="p1"><span class="s1">            </span></p>
+<p class="p1"><span class="s1">            // Generate heatmap</span></p>
+<p class="p1"><span class="s1">            for (let i = 0; i &lt; xCoord * yCoord; i++) {</span></p>
+<p class="p1"><span class="s1">                const plot = document.createElement("div");</span></p>
+<p class="p1"><span class="s1">                plot.classList.add("plot");</span></p>
+<p class="p1"><span class="s1">                plot.dataset.x = (i % xCoord) + 1;</span></p>
+<p class="p1"><span class="s1">                plot.dataset.y = Math.floor(i / yCoord) + 1;</span></p>
+<p class="p1"><span class="s1">                </span></p>
+<p class="p1"><span class="s1">                // Determine moisture level and add corresponding class</span></p>
+<p class="p1"><span class="s1">                if (moistureLevels[i] &lt; 650) {</span></p>
+<p class="p1"><span class="s1">                    plot.classList.add("dry");</span></p>
+<p class="p1"><span class="s1">                } else if (moistureLevels[i] &lt;= 680) {</span></p>
+<p class="p1"><span class="s1">                    plot.classList.add("nice");</span></p>
+<p class="p1"><span class="s1">                } else {</span></p>
+<p class="p1"><span class="s1">                    plot.classList.add("wet");</span></p>
+<p class="p1"><span class="s1">                }</span></p>
+<p class="p1"><span class="s1">                </span></p>
+<p class="p1"><span class="s1">                container.appendChild(plot);</span></p>
+<p class="p1"><span class="s1">            }</span></p>
+<p class="p1"><span class="s1">        });</span></p>
+<p class="p1"><span class="s1">    &lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+</body>
+</html>

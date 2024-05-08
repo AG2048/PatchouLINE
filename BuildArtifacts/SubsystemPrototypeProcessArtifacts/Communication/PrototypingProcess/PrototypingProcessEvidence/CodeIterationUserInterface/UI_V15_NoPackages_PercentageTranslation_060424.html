@@ -1,0 +1,383 @@
+
+
+<!DOCTYPE html>
+<html lang='en'>
+
+
+<head>
+   <meta charset='UTF-8'>
+   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+   <title>Heatmap with Gradient Legend</title>
+   <style>
+       html,
+       body,
+       #container {
+           width: 100%;
+           height: 100%;
+           margin: 0;
+           padding: 0;
+           align: 'center';
+           position: relative;
+           border: 7px solid #FFFFFF;
+           margin-top: 10px;
+           margin-bottom: 10px;
+
+
+       }
+
+
+       .heatmap {
+           display: grid;
+           grid-template-columns: auto repeat(2, 1fr);
+           grid-template-rows: auto repeat(2, 1fr);
+           gap: 2px;
+           width: 400px;
+           height: 400px;
+           position: relative;
+           text-align: center;
+       }
+
+
+       .plot {
+           border: 1px solid #fff;
+           position: relative;
+       }
+
+
+       .plot:hover::before {
+           content: attr(data-heat);
+           position: absolute;
+           top: 50px;
+           left: 50%;
+           transform: translateX(-50%);
+           background-color: rgba(255, 255, 255, 0.8);
+           padding: 5px;
+           border-radius: 5px;
+           font-size: 11px;
+       }
+
+
+       .row-label,
+       .column-label {
+           text-align: center;
+           font-size: 14px;
+           line-height: 14px;
+
+
+       }
+
+
+       .row-label {
+           grid-column: 1;
+           grid-row: span 1;
+           padding: 150px 0;
+           text-align: center;
+       }
+
+
+       .column-label {
+           grid-row: 1;
+           grid-column: span 2;
+           vertical-align: middle;
+           justify-self: center;
+           /* Center the row labels */
+       }
+
+
+
+
+       #legend {
+           margin-top: 20px;
+           text-align: center;
+           position: relative;
+           width: 400px;
+           height: 30px;
+       }
+
+
+       .gradient {
+           position: absolute;
+           width: 100%;
+           height: 100%;
+           background-image: linear-gradient(to right, #FFA500, #B0D8A4, #6495ED);
+       }
+
+
+       .legend-labels {
+           position: absolute;
+           top: 35px;
+           display: flex;
+           justify-content: space-between;
+           width: 100%;
+       }
+
+
+       .legend-label {
+           flex: 1;
+           text-align: center;
+           font-size: 12px;
+       }
+
+
+       .legend-color {
+           width: 20px;
+           height: 20px;
+           display: inline-block;
+           margin-right: 5px;
+           border: 1px solid #ccc;
+           vertical-align: middle;
+       }
+   </style>
+</head>
+
+
+<body>
+   <!--Title-->
+   <center>
+       <h1> Patchouli Soil Moisture Levels</h1>
+       <h2><i>Tingkat Kelembaban Tanah Nilam</i></h2>
+   </center>
+
+
+
+
+   <body> The following map depicts the soil moisture levels of all patchouli plots. Each plot is provided with an associated colour which presents the moisture level of the designated plot. The numbers along the rows and columns distinguish each plot. Please see the legend below to determine the soil moisture level of the plot and the associated recommendation.</body>
+   <br>
+   <br>
+   <body><i>Berikut ini adalah peta yang menggambarkan tingkat kelembaban tanah dari semua petak tanaman nilam. Setiap petak diberikan warna terkait yang menunjukkan tingkat kelembaban tanah dari petak yang ditentukan. Angka di sepanjang baris dan kolom membedakan setiap petak. Silakan lihat legenda di bawah ini untuk menentukan tingkat kelembaban tanah dari petak dan rekomendasi yang terkait.</i></body>
+   <br>
+   <br>
+   <body> Click on a coloured square to receive an update of the patchouli plot's status!</body>
+   <br>
+   <br>
+   <body><i>Klik pada kotak berwarna untuk mendapatkan pembaruan status petak tanaman nilam Anda</i></body>
+   <!-- Heatmap -->
+   <div id='container' class='heatmap'></div>
+   <!-- Legend -->
+   <br>
+   <center>
+       <h2>Legend</h2>
+       <h3><i>Legenda</i></h3>
+       <div id='legend'>
+           <div class='gradient'></div>
+           <div class='legend-labels'>
+               <div class='legend-label'>Too Little Moisture <br> [Less than 76%] <br><br> <i> Terlalu Sedikit Kelembapan <br> [Kurang dari 76%] </i></div>
+               <div class='legend-label'>Proper Moisture <br>[Between 76% and 80%] <br><br> <i>Kelembapan yang Tepat <br>[Antara 76% dan 80%]</i> </div>
+               <div class='legend-label'>Too Much Moisture <br>[Greater than 80%] <br><br> <i>Terlalu Banyak Kelembapan <br>[Lebih dari 80%]</i> </div>
+           </div>
+           <br>
+           <br>
+           </div>
+       </div>
+       
+   </center>
+   <br>
+   <br>
+   <br>
+   <br>
+    <br>
+
+
+   <h3>Recommendation</h3>
+   <h4><i>Rekomendasi</i></h4>
+
+
+   <body>
+       Dry soil regions with a moisture level below 76% (orange) are in need of additional watering for optimal patchouli survival. <strong>Please water this patchouli plot!</strong>
+       <br>
+       <br>
+       <i>Daerah tanah kering dengan tingkat kelembaban di bawah 76% (oranye) memerlukan penyiraman tambahan untuk kelangsungan hidup nilam yang optimal.
+       <strong>Silakan siram petak nilam ini!</strong></i>
+
+
+       <br>
+       <br> Overwatered soil regions with a moisture level above 80% (blue) are at risk of overwatering the patchouli plant. <strong>Don't water this patchouli plot and limit any moisture added!</strong>
+        <br>
+       <br>
+      <i>Daerah tanah yang terlalu disiram dengan tingkat kelembaban di atas 80% (biru) berisiko menyiram tanaman nilam berlebihan. <strong>Jangan menyiram petak nilam ini dan batasi penambahan kelembaban apa pun!</strong></i>
+
+
+
+
+       <br>
+       <br> Well-maintained soil regions with a moisture level between 76% and 80% have sufficient moisture levels for optimal patchouli growth. <strong>This plot doesn't need any more water!</strong>
+       
+        <br>
+       <br><i>
+      Daerah tanah yang terawat dengan baik dengan tingkat kelembaban antara 76% dan 80% memiliki tingkat kelembaban yang cukup untuk pertumbuhan nilam yang optimal. <strong>Petak ini tidak memerlukan air lagi!</strong></i>
+
+
+
+
+   </body>
+
+
+
+
+   <br>
+   <br>
+   </center>
+
+
+   <script>
+       document.addEventListener('DOMContentLoaded', function() {
+           // Plot dimensions
+           const xCoord = 2;
+           const yCoord = 2;
+
+
+           // Container for heatmap plots
+           const container = document.getElementById('container');
+
+
+           // Sensor readings
+           const moistureLevels = [500, 600, 800, 0];
+
+
+           // Define color stops and corresponding moisture levels
+           const colorStops = [{
+                   color: '#FFA500',
+                   moistureLevel: 0
+               }, // Dry
+               {
+                   color: '#B0D8A4',
+                   moistureLevel: 650
+               }, // Nice
+               {
+                   color: '#6495ED',
+                   moistureLevel: 1000
+               } // Wet
+           ];
+
+
+           // Add row and column labels
+
+
+
+
+           // Generate heatmap
+           for (let i = 0; i < xCoord * yCoord; i++) {
+               if (i % xCoord == 0) {
+                   const rowLabel = document.createElement('div');
+                   rowLabel.classList.add('row-label');
+                   rowLabel.textContent = i / xCoord + 1;
+                   container.appendChild(rowLabel);
+                   // container.style.textAlign = 'center';
+                   //container.style.verticalAlign = middle;
+               }
+               const plot = document.createElement('div');
+               plot.classList.add('plot');
+               plot.dataset.x = (i % xCoord) + 1;
+               plot.dataset.y = Math.floor(i / yCoord) + 1;
+
+
+               // Determine color based on moisture level
+               const moistureLevel = parseInt(moistureLevels[i]);
+             
+               let color;
+               if (moistureLevel == 0) {
+                   color = '#FFFFFF'; // Set white color for no reading
+               } else {
+                   color = interpolateColor(moistureLevel, colorStops);
+               }
+
+
+               plot.style.backgroundColor = color;
+               plot.dataset.heat = 'Soil Moisture Level: ' +  Math.round(moistureLevel/850*100) + '%'  + 'n' + 'n Tingkat Kelembaban Tanah: ' +  Math.round(moistureLevel/850*100) + '%' ;
+
+
+               // Add event listener for click
+               plot.addEventListener("click", function() {
+                   alert('Soil Moisture Level / Tingkat Kelembaban Tanah: ' + Math.round(moistureLevel/850*100) + '%' + 'n' + getMessage(moistureLevel));
+               });
+
+
+               container.appendChild(plot);
+           }
+           for (let i = 1; i <= 2; i++) {
+               const columnLabel = document.createElement('div');
+               columnLabel.classList.add('column-label');
+               columnLabel.textContent = i;
+               container.appendChild(columnLabel);
+               //container.style.verticalAlign = middle;
+           }
+
+
+       });
+
+
+       // Function to interpolate color based on moisture level
+       function interpolateColor(moistureLevel, colorStops) {
+           for (let i = 1; i < colorStops.length; i++) {
+               const prevStop = colorStops[i - 1];
+               const currentStop = colorStops[i];
+
+
+               if (moistureLevel == null) {
+                   interpolatedColor = '#FFFFFF';
+                   return interpolatedColor;
+
+
+               } else if (moistureLevel == 0) {
+                   interpolatedColor = '#FFFFFF';
+                   return interpolatedColor;
+
+
+               } else if (moistureLevel <= currentStop.moistureLevel) {
+                   const prevColor = prevStop.color;
+                   const currentColor = currentStop.color;
+                   const prevMoisture = prevStop.moistureLevel;
+                   const currentMoisture = currentStop.moistureLevel;
+
+
+                   // Interpolate between previous and current colors
+                   const t = (moistureLevel - prevMoisture) / (currentMoisture - prevMoisture);
+                   const interpolatedColor = interpolate(prevColor, currentColor, t);
+                   return interpolatedColor;
+               }
+           }
+           // Default color (in case moisture level exceeds all stops) -> blue
+           return colorStops[colorStops.length - 1].color;
+       }
+
+
+       // Function to interpolate between two colors for gradient
+       function interpolate(color1, color2, t) {
+           const r1 = parseInt(color1.substr(1, 2), 16);
+           const g1 = parseInt(color1.substr(3, 2), 16);
+           const b1 = parseInt(color1.substr(5, 2), 16);
+           const r2 = parseInt(color2.substr(1, 2), 16);
+           const g2 = parseInt(color2.substr(3, 2), 16);
+           const b2 = parseInt(color2.substr(5, 2), 16);
+           const r = Math.round(r1 + (r2 - r1) * t);
+           const g = Math.round(g1 + (g2 - g1) * t);
+           const b = Math.round(b1 + (b2 - b1) * t);
+           return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
+       }
+
+
+       function componentToHex(c) {
+           const hex = c.toString(16);
+           return hex.length == 1 ? '0' + hex : hex;
+       }
+
+
+       function getMessage(heat) {
+           if (heat < 650) {
+               return 'This plot is dry. The patchouli plants are in need of water!' +'n'  + 'Plot ini kering. Tanaman nilam membutuhkan air!' ;
+           } else if (heat <= 680) {
+               return 'This plot has sufficient moisture. It does not need any more water for now!' + 'nPlot ini memiliki kelembapan yang cukup. Ia tidak membutuhkan air lagi untuk saat ini!';
+           } else {
+               return 'This plot is overwatered.' + 'nPlot ini tergenang air.';
+           }
+       }
+   </script>
+</body>
+
+
+</html>
+
+
+
+
+
